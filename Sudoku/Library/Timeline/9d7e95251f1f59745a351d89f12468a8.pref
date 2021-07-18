@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   timeInFrames: 1
-  timeAreaShownRange: {x: -0.03249581, y: 0.8351424}
+  timeAreaShownRange: {x: -0.027210884, y: 0.7727891}
   showAudioWaveform: 1
   trackScale: 1
   playRangeEnabled: 0
@@ -24,12 +24,13 @@ MonoBehaviour:
   m_Keys:
   - {fileID: -528491934582127219, guid: 9d7e95251f1f59745a351d89f12468a8, type: 2}
   - {fileID: 4490391195712080248, guid: 9d7e95251f1f59745a351d89f12468a8, type: 2}
+  - {fileID: -6171613952414325694, guid: 9d7e95251f1f59745a351d89f12468a8, type: 2}
   m_Vals:
   - collapsed: 0
     showMarkers: 1
     showInlineCurves: 1
     inlineAnimationCurveHeight: 100
-    lastInlineCurveDataID: -21730
+    lastInlineCurveDataID: 15160
     inlineCurvesState:
       scrollPos: {x: 0, y: 0}
       m_SelectedIDs: 
@@ -55,16 +56,16 @@ MonoBehaviour:
     inlineCurvesShownAreaInsideMargins:
       serializedVersion: 2
       x: 0
-      y: -400
-      width: 0.83514255
-      height: 500
+      y: 0.000000014901161
+      width: 0.7727891
+      height: 1
     m_MarkerTimeStampsKeys: 
     m_MarkerTimeStampsValues: 
   - collapsed: 0
     showMarkers: 1
     showInlineCurves: 1
     inlineAnimationCurveHeight: 100
-    lastInlineCurveDataID: -21744
+    lastInlineCurveDataID: 15162
     inlineCurvesState:
       scrollPos: {x: 0, y: 0}
       m_SelectedIDs: 
@@ -90,8 +91,43 @@ MonoBehaviour:
     inlineCurvesShownAreaInsideMargins:
       serializedVersion: 2
       x: 0
-      y: -100.00002
-      width: 0.83514255
-      height: 500
+      y: 0.000000014901161
+      width: 0.7727891
+      height: 1
+    m_MarkerTimeStampsKeys: 
+    m_MarkerTimeStampsValues: 
+  - collapsed: 0
+    showMarkers: 1
+    showInlineCurves: 0
+    inlineAnimationCurveHeight: 100
+    lastInlineCurveDataID: -1
+    inlineCurvesState:
+      scrollPos: {x: 0, y: 0}
+      m_SelectedIDs: 
+      m_LastClickedID: 0
+      m_ExpandedIDs: 
+      m_RenameOverlay:
+        m_UserAcceptedRename: 0
+        m_Name: 
+        m_OriginalName: 
+        m_EditFieldRect:
+          serializedVersion: 2
+          x: 0
+          y: 0
+          width: 0
+          height: 0
+        m_UserData: 0
+        m_IsWaitingForDelay: 0
+        m_IsRenaming: 0
+        m_OriginalEventType: 11
+        m_IsRenamingFilename: 0
+        m_ClientGUIView: {fileID: 0}
+      m_SearchString: 
+    inlineCurvesShownAreaInsideMargins:
+      serializedVersion: 2
+      x: 1
+      y: 1
+      width: 1
+      height: 1
     m_MarkerTimeStampsKeys: 
     m_MarkerTimeStampsValues: 
