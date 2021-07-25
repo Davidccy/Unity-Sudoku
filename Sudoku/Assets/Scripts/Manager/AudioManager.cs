@@ -5,7 +5,7 @@ using DG.Tweening;
 public class AudioManager : ISingleton<AudioManager> {
     #region Internal Fields
     private AudioSource _asBGM = null;
-    private AudioSource _asSound = null;
+    private AudioSource _asSE = null;
 
     private float _volumeBGM = 1;
     private float _volumeSE = 1;
@@ -13,11 +13,34 @@ public class AudioManager : ISingleton<AudioManager> {
     private Tween _fadeInFadeOut = null;
     private float _fadeInFadeOutDuration = 0.3f;
 
+    private float _bgmRepeatTime = -1;
+    private float _bgmLoopStartTime = -1;
+
     private const float _DEFAULT_VOLUME_BGM = 0.5f;
     private const float _DEFAULT_VOLUME_SE = 0.5f;
+
+    [Header("Audio Clip Testing")]
+    [SerializeField]
+    private float RepeatTime = 50;
+    [SerializeField]
+    private float LoopPoint = 10;
+    [SerializeField]
+    private float JumpToPoint = 0;
     #endregion
 
     #region Properties
+    public bool IsBGMPlaying {
+        get {
+            return _asBGM != null && _asBGM.isPlaying;
+        }
+    }
+
+    public bool IsSEPlaying {
+        get {
+            return _asSE != null && _asSE.isPlaying;
+        }
+    }
+
     public float VolumeBGM {
         get {
             return _volumeBGM;
@@ -28,6 +51,24 @@ public class AudioManager : ISingleton<AudioManager> {
         get {
             return _volumeSE;
         }
+    }
+    #endregion
+
+    #region Mono Behaviour Hooks
+    private void Update() {
+        if (_asBGM != null && _asBGM.loop) {
+            if (_bgmRepeatTime != -1 && _asBGM.time >= _bgmRepeatTime) {
+                _asBGM.time = _bgmLoopStartTime;
+            }
+        }
+
+#if UNITY_EDITOR
+        if (Input.GetKeyDown(KeyCode.Z)) {
+            if (_asBGM != null && _asBGM.isPlaying) {
+                _asBGM.time = JumpToPoint;
+            }
+        }
+#endif
     }
     #endregion
 
@@ -44,28 +85,30 @@ public class AudioManager : ISingleton<AudioManager> {
             _asBGM.volume = _volumeBGM;
         }
 
-        if (_asSound == null) {
-            _asSound = gameObject.AddComponent<AudioSource>();
-            _asSound.volume = _volumeSE;
+        if (_asSE == null) {
+            _asSE = gameObject.AddComponent<AudioSource>();
+            _asSE.volume = _volumeSE;
         }
     }
     #endregion
 
     #region APIs
-    public async Task PlayBGM(AudioClip ac, bool loop = false) {
-        //bool skipTween = _asBGM.clip == null;
+    public async Task PlayBGM(AudioClip ac, bool loop = false, float repeatTime = -1, float loopStartTime = -1) {
         await BGMVolumeFadeOut(false);
 
         _asBGM.clip = ac;
         _asBGM.loop = loop;
         _asBGM.Play();
 
+        _bgmRepeatTime = repeatTime;
+        _bgmLoopStartTime = loopStartTime;
+
         await BGMVolumeFadeIn(false);
     }
 
-    public void PlaySound(AudioClip ac) {
-        _asSound.clip = ac;
-        _asSound.Play();
+    public void PlaySE(AudioClip ac) {
+        _asSE.clip = ac;
+        _asSE.Play();
     }
 
     public void SetVolumeBGM(float value) {
@@ -81,7 +124,7 @@ public class AudioManager : ISingleton<AudioManager> {
         value = Mathf.Clamp(value, 0, 1);
 
         _volumeSE = value;
-        _asSound.volume = value;
+        _asSE.volume = value;
 
         PlayerPrefs.SetFloat(SystemDefine.KEY_VOLUME_SE, value);
     }

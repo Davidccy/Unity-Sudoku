@@ -12,10 +12,17 @@ public class UIWindowOption : UIGenericWindow {
 
     [SerializeField]
     private Button[] _btnBGMs = null;
+
+    [SerializeField]
+    private AudioClip _sliderSoundEffect = null;
     #endregion
 
     #region Exposed Fields
     public override string WindowName => SystemDefine.UI_WINDOW_NAME_OPTION;
+    #endregion
+
+    #region Internal Fields
+    private bool _initializing = false;
     #endregion
 
     #region Override Methods
@@ -24,14 +31,18 @@ public class UIWindowOption : UIGenericWindow {
         _sliderSE.onValueChanged.AddListener(SliderSEOnValueChanged);
 
         for (int i = 0; i < _btnBGMs.Length; i++) {
-            int bgmIndex = i + 1;
+            int bgmIndex = i;
             _btnBGMs[i].onClick.AddListener(() => ButtonBGMOnClick(bgmIndex));
         }
     }
 
     protected override void OnWindowEnable() {
+        _initializing = true;
+
         _sliderBGM.value = AudioManager.Instance.VolumeBGM;
         _sliderSE.value = AudioManager.Instance.VolumeSE;
+
+        _initializing = false;
 
         Refresh();
     }
@@ -49,10 +60,12 @@ public class UIWindowOption : UIGenericWindow {
     #region UI Slider Ui Button Handlings
     private void SliderBGMOnValueChanged(float value) {
         AudioManager.Instance.SetVolumeBGM(value);
+        PlaySliderSoundEffect();
     }
 
     private void SliderSEOnValueChanged(float value) {
         AudioManager.Instance.SetVolumeSE(value);
+        PlaySliderSoundEffect();
     }
 
     private void ButtonBGMOnClick(int bgmIndex) {
@@ -74,9 +87,25 @@ public class UIWindowOption : UIGenericWindow {
     private void RefreshBGMButton() {
         int curBGMIndex = BGMManager.Instance.CurrentBGMIndex;
         for (int i = 0; i < _btnBGMs.Length; i++) {
-            int bgmIndex = i + 1;
+            int bgmIndex = i;
             _btnBGMs[i].interactable = bgmIndex != curBGMIndex;
         }
+    }
+
+    private void PlaySliderSoundEffect() {
+        if (_initializing) {
+            return;
+        }
+
+        if (_sliderSoundEffect == null) {
+            return;
+        }
+
+        //if (AudioManager.Instance.IsSEPlaying) {
+        //    return;
+        //}
+
+        AudioManager.Instance.PlaySE(_sliderSoundEffect);
     }
     #endregion
 }

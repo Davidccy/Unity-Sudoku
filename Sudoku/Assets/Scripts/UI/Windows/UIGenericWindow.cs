@@ -92,7 +92,7 @@ public abstract class UIGenericWindow : MonoBehaviour {
 		Show(false, false).DoNotAwait();
 
 		if (_audioClipClose != null) {
-			AudioManager.Instance.PlaySound(_audioClipClose);
+			AudioManager.Instance.PlaySE(_audioClipClose);
 		}
 	}
 	#endregion

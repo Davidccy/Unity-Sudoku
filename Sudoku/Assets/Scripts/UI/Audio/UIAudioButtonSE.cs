@@ -32,7 +32,7 @@ public class UIAudioButtonSE : MonoBehaviour {
             return;
         }
 
-        AudioManager.Instance.PlaySound(_se);
+        AudioManager.Instance.PlaySE(_se);
     }
     #endregion
 }

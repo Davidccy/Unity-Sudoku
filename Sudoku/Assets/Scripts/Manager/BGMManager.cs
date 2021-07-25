@@ -4,6 +4,7 @@ using UnityEngine;
 public class BGMManager : ISingleton<BGMManager> {
     #region Internal Fields
     private int _bgmIndex = 0;
+    private GameConfig _gameConfig = null;
     #endregion
 
     #region Properties
@@ -23,26 +24,12 @@ public class BGMManager : ISingleton<BGMManager> {
 
     #region APIs
     public async Task PlayBGM(int bgmIndex) {
-        AudioClip bgm = await LoadBGM(bgmIndex);
-        if (bgm == null) {
+        BGMData data = await GetBGMData(bgmIndex);
+        if (data == null) {
             return;
         }
 
-        AudioManager.Instance.PlayBGM(bgm, true).DoNotAwait();
-    }
-
-    public async Task<AudioClip> LoadBGM(int bgmIndex) {
-        string bgmName = GetBGMName(bgmIndex);
-        string path = string.Format("Audio/{0}", bgmName);
-        ResourceRequest request = Resources.LoadAsync<AudioClip>(path);
-
-        while (!request.isDone) {
-            await Task.Delay(1);
-        }
-
-        AudioClip ac = request.asset as AudioClip;
-
-        return ac;
+        AudioManager.Instance.PlayBGM(data.BGM, true, data.RepeatTime, data.LoopStartTime).DoNotAwait();
     }
 
     public void SaveBGM(int bgmIndex) {
@@ -52,25 +39,16 @@ public class BGMManager : ISingleton<BGMManager> {
     #endregion
 
     #region Internal Methods
-    private string GetBGMName(int bgmIndex) {
-        string name = string.Empty;
-
-        switch (bgmIndex) {
-            case 1:
-                name = SystemDefine.AUDIO_BGM1_NAME;
-                break;
-            case 2:
-                name = SystemDefine.AUDIO_BGM2_NAME;
-                break;
-            case 3:
-                name = SystemDefine.AUDIO_BGM3_NAME;
-                break;
-            default:
-                name = SystemDefine.AUDIO_BGM1_NAME;
-                break;
+    private async Task<BGMData> GetBGMData(int bgmIndex) {
+        if (_gameConfig == null) {
+            _gameConfig = await SystemUtility.GetGameConfig();
         }
 
-        return name;
+        if (_gameConfig == null || _gameConfig.BackGroundMusics.Length <= bgmIndex) {
+            return null;
+        }
+
+        return _gameConfig.BackGroundMusics[bgmIndex];
     }
     #endregion
 }

@@ -24,6 +24,10 @@ public class UIMain : MonoBehaviour {
         // BGM
         int bgmIndex = BGMManager.Instance.CurrentBGMIndex;
         BGMManager.Instance.PlayBGM(bgmIndex).DoNotAwait();
+
+#if UNITY_EDITOR
+        Application.runInBackground = true;
+#endif
     }
     #endregion
 }
