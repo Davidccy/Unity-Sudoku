@@ -30,6 +30,8 @@ public class SudokuData {
 
 	private List<SlotData> _emptySlotDataList;	// Slot with no value
 	private List<SlotData> _filledSlotDataList; // Slot filled with value
+
+	private Action _onInputChanged = null;
     #endregion
 
     #region Initializations
@@ -122,6 +124,10 @@ public class SudokuData {
 		return _slotDataList[slotIndex];
 	}
 
+	public void SetInputChangedAction(Action action) {
+		_onInputChanged = action;
+	}
+
 	public void SetSlotValueAndReason(int rowIndex, int columnIndex, int value, FillReason reason) {
 		int slotIndex = SudokuUtility.ConvertToSlotIndex(rowIndex, columnIndex);
 		SetSlotValueAndReason(slotIndex, value, reason);
@@ -130,10 +136,18 @@ public class SudokuData {
 	public void SetSlotValueAndReason(int slotIndex, int value, FillReason reason) {
 		_slotDataList[slotIndex].Value = value;
 		_slotDataList[slotIndex].Reason = reason;
+
+		if (_onInputChanged != null) {
+			_onInputChanged();
+		}
 	}
 
 	public bool HasEmptySlot() {
 		return _emptySlotDataList.Count > 0;
+	}
+
+	public bool HasAnyInput() {
+		return _filledSlotDataList.Count > 0;
 	}
 
 	public List<int> GetAllEmptySlotIndex() {
@@ -512,6 +526,7 @@ public enum FillReason {
 	SquareRemain,
 	SlotExclude,
 	CommonSolution,
+	PlayerInput,
 }
 
 public class UndoCommand {
@@ -574,27 +589,20 @@ public static class SudokuUtility {
 
 	public static Color GetFillReasonColor(FillReason reason) {
 		Color c = Color.black;
+
 		switch (reason) {
-			case FillReason.None:
-				break;
-			case FillReason.QuestionInput:
-				break;
 			case FillReason.RowRemain:
-				c = Color.red;
-				break;
 			case FillReason.ColumnRemain:
-				c = Color.red;
-				break;
 			case FillReason.SquareRemain:
-				c = Color.red;
-				break;
 			case FillReason.SlotExclude:
-				c = Color.red;
-				break;
 			case FillReason.CommonSolution:
+			case FillReason.PlayerInput:
 				c = Color.red;
 				break;
+			case FillReason.None:
+			case FillReason.QuestionInput:
 			default:
+				c = Color.black;
 				break;
 		}
 
@@ -609,6 +617,32 @@ public static class SudokuUtility {
 		rowIndex = slotIndex / PUZZLE_LENGTH;
 		columnIndex = slotIndex % PUZZLE_LENGTH;
 		squareIndex = 3 * (slotIndex % (PUZZLE_LENGTH * SQUARE_LENGTH)) + (slotIndex % PUZZLE_LENGTH) / SQUARE_LENGTH;
+	}
+
+	public static bool IsSudokuDataComplete(SudokuData sData) {
+		if (sData == null) {
+			return false;
+		}
+
+		for (int i = 0; i < PUZZLE_LENGTH; i++) {
+			if (!IsRowComplete(sData, i)) {
+				return false;
+			}
+		}
+
+		for (int i = 0; i < PUZZLE_LENGTH; i++) {
+			if (!IsColumnComplete(sData, i)) {
+				return false;
+			}
+		}
+
+		for (int i = 0; i < PUZZLE_LENGTH; i++) {
+			if (!IsSquareComplete(sData, i)) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	public static bool IsRowComplete(SudokuData sData, int rowIndex) {

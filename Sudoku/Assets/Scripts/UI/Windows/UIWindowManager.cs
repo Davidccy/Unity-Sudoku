@@ -30,50 +30,68 @@ public class UIWindowManager : MonoBehaviour {
     #endregion
 
     #region APIs
-    public async Task<UIGenericWindow> LoadWindow(string windowName) {
-        string path = string.Format("Prefabs/Windows/{0}", windowName);
-        ResourceRequest request = Resources.LoadAsync<UIGenericWindow>(path);
-        while (!request.isDone) {
-            await Task.Delay(1);
-        }
-
-        UIGenericWindow window = request.asset as UIGenericWindow;
-        UIGenericWindow windowPrefab = null;
-        if (window != null) {
-            windowPrefab = Instantiate(window, _tfWindowRoot);
-        }
-
-        return windowPrefab;
-    }
-
-    public async Task OpenWindow(string windowName) {
-        UIGenericWindow window = GetWindow(windowName);
-        if (window == null) {
-            window = await LoadWindow(windowName);
-        }
-
-        if (window != null) {
-            await window.Show(true, false);
-        }
-    }
-
-    public async Task CloseWindow(string windowName) {
-        UIGenericWindow window = GetWindow(windowName);
-        if (window != null) {
-            await window.Show(false, false);
-        }
-    }
-    #endregion
-
-    #region Internal Methods
-    private UIGenericWindow GetWindow(string windowName) {
+    public async Task<UIGenericWindow> GetWindow(string windowName, bool loadIfNotExist = true) {
         for (int i = 0; i < _loadedWindow.Count; i++) {
             if (_loadedWindow[i].WindowName == windowName) {
                 return _loadedWindow[i];
             }
         }
 
-        return null;
+        UIGenericWindow window = await LoadWindow(windowName);
+
+        return window;
+    }
+
+    public async Task<UIGenericWindow> OpenWindow(string windowName, bool loadIfNotExist = true) {
+        UIGenericWindow window = await GetWindow(windowName, loadIfNotExist);
+        if (window != null) {
+            await window.Show(true, false);
+        }
+
+        return window;
+    }
+
+    public async Task<UIGenericWindow> CloseWindow(string windowName, bool loadIfNotExist = false) {
+        UIGenericWindow window = await GetWindow(windowName, loadIfNotExist);
+        if (window != null) {
+            await window.Show(false, false);
+        }
+
+        return window;
+    }
+    #endregion
+
+    #region Internal Methods
+    private void AddWindow(UIGenericWindow window) {
+        if (window == null) {
+            return;
+        }
+
+        for (int i = 0; i < _loadedWindow.Count; i++) {
+            if (_loadedWindow[i].WindowName == window.name) {
+                break;
+            }
+        }
+
+        _loadedWindow.Add(window);
+    }
+
+    private async Task<UIGenericWindow> LoadWindow(string windowName) {
+        string path = string.Format("Prefabs/Windows/{0}", windowName);
+        ResourceRequest request = Resources.LoadAsync<UIGenericWindow>(path);
+        while (!request.isDone) {
+            await Task.Delay(1);
+        }
+
+        UIGenericWindow window = null;
+        UIGenericWindow windowAsset = request.asset as UIGenericWindow;
+        if (windowAsset != null) {
+            window = Instantiate(windowAsset, _tfWindowRoot);
+
+            AddWindow(window);
+        }
+
+        return window;
     }
     #endregion
 }

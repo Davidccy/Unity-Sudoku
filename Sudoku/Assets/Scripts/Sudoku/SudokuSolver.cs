@@ -10,28 +10,10 @@ public class SudokuSolver : MonoBehaviour {
 	[Header("Reset Menu")]
 	[SerializeField]
 	private Button _btnReset = null;
-	[SerializeField]
-	private Button _btnResetYes = null;
-	[SerializeField]
-	private Button _btnResetNo = null;
-	[SerializeField]
-	private RectTransform _rtResetMenu = null;
-	[SerializeField]
-	private CanvasGroup _cgReset = null;
 
 	[Header("Serial Number Menu")]
 	[SerializeField]
 	private Button _btnSerialNumber = null;
-	[SerializeField]
-	private Button _btnSerialNumberYes = null;
-	[SerializeField]
-	private Button _btnSerialNumberNo = null;
-	[SerializeField]
-	private RectTransform _rtSerialNumberMenu = null;
-	[SerializeField]
-	private CanvasGroup _cgSerialNumber = null;
-	[SerializeField]
-	private List<TMP_InputField> _inputFieldSerialNumberList = null;	
 		
 	[Header("Question Area")]
 	[SerializeField]
@@ -65,14 +47,6 @@ public class SudokuSolver : MonoBehaviour {
 	private int _undoIndex = 0;
 	private List<UndoCommand> _undoCmdList = new List<UndoCommand>();
 	private List<UISolutionLog> _solutionLogList = new List<UISolutionLog>();
-
-	// Reset menu
-	private bool _resetMenuOpened = false;
-	private Tween _tweenResetMenu = null;
-
-	// Serial number menu
-	private bool _serialNumberMenuOpened = false;
-	private Tween _tweenSerialNumberMenu = null;
     #endregion
 
     #region MonoBehaviour Hooks
@@ -86,55 +60,68 @@ public class SudokuSolver : MonoBehaviour {
 	}
 	#endregion
 
-	#region UI Button Call Backs
-	public void ButtonResetOnClick() {
-		ShowResetMenu(!_resetMenuOpened, false).DoNotAwait();
-	}
-
-	public void ButtonResetYesOnClick() {
-		ResetData();
-		ShowResetMenu(false, false).DoNotAwait();
-	}
-
-	public void ButtonResetNoOnClick() {
-		ShowResetMenu(false, false).DoNotAwait();
-	}
-
-	public void ButtonSerialNumberOnClick() {
-		ShowSerialNumberMenu(!_serialNumberMenuOpened, false).DoNotAwait();
-	}
-
-	public void ButtonSerialNumberYesOnClick() {
-		// Check
-		if (_inputFieldSerialNumberList == null || _inputFieldSerialNumberList.Count != SudokuUtility.PUZZLE_LENGTH) {
-			Debug.LogErrorFormat("Null input field or unexpected count of input field");
+	#region UI Button Handlings
+	public async void ButtonResetOnClick() {
+		UIWindowMessage window = 
+			await UIWindowManager.Instance.GetWindow(SystemDefine.UI_WINDOW_NAME_MESSAGE) as UIWindowMessage;
+		if (window == null) {
 			return;
 		}
 
-		for (int i = 0; i < _inputFieldSerialNumberList.Count; i++) {
-			string input = _inputFieldSerialNumberList[i].text;
-			if (input.Length != SudokuUtility.PUZZLE_LENGTH) {
-				Debug.LogErrorFormat("Unexpected length of input in row {0}", i + 1);
-				return;
-			}
-		}
+		UIWindowMessage.MessageCmd cmd = new UIWindowMessage.MessageCmd();
+		cmd.Type = UIWindowMessage.MessageType.YesNo;
+		cmd.Title = "Are you sure to reset all slot ?";
+		cmd.ActionYes = () => {
+			ResetData();
+			UIWindowManager.Instance.CloseWindow(SystemDefine.UI_WINDOW_NAME_MESSAGE).DoNotAwait();
+		};
+		cmd.ActionNo = () => {
+			UIWindowManager.Instance.CloseWindow(SystemDefine.UI_WINDOW_NAME_MESSAGE).DoNotAwait();
+		};
 
-		// Fill input
-		for (int i = 0; i < _inputFieldSerialNumberList.Count; i++) {
-			string input = _inputFieldSerialNumberList[i].text;
-			for (int j = 0; j < SudokuUtility.PUZZLE_LENGTH; j++) {
-				int slotIndex = i * SudokuUtility.PUZZLE_LENGTH + j;
-				int inputValue = int.Parse(input.Substring(j, 1));
-				_sData.SetSlotValueAndReason(slotIndex, inputValue, FillReason.QuestionInput);
-			}
-		}
-
-		RefreshUISlots();
-		ShowSerialNumberMenu(false, false).DoNotAwait();
+		window.SetInfo(cmd);
+		window.Show(true, false).DoNotAwait();
 	}
 
-	public void ButtonSerialNumberNoOnClick() {
-		ShowSerialNumberMenu(false, false).DoNotAwait();
+	public async void ButtonSerialNumberOnClick() {
+		UIWindowSerialNumber window = 
+			await UIWindowManager.Instance.GetWindow(SystemDefine.UI_WINDOW_NAME_SERIAL_NUMBER) as UIWindowSerialNumber;
+
+		if (window == null) {
+			return;
+		}
+
+		window.SetConfirmAction(
+			(inputList) => {
+				if (inputList == null || inputList.Count != SudokuUtility.PUZZLE_LENGTH) {
+					Debug.LogErrorFormat("Null input field or unexpected count of input field");
+					return;
+				}
+
+				//for (int i = 0; i < inputList.Count; i++) {
+				//	string input = inputList[i];
+				//	if (input.Length != SudokuUtility.PUZZLE_LENGTH) {
+				//		Debug.LogErrorFormat("Unexpected length of input in row {0}", i + 1);
+				//		return;
+				//	}
+				//}
+
+				// Fill input
+				for (int i = 0; i < inputList.Count; i++) {
+					string input = inputList[i];
+					for (int j = 0; j < SudokuUtility.PUZZLE_LENGTH; j++) {
+						int slotIndex = i * SudokuUtility.PUZZLE_LENGTH + j;
+						int inputValue = int.Parse(input.Substring(j, 1));
+						_sData.SetSlotValueAndReason(slotIndex, inputValue, FillReason.QuestionInput);
+					}
+				}
+
+				_sData.Update();
+
+				Refresh();
+			});
+
+		window.Show(true, false).DoNotAwait();
 	}
 
 	public void ButtonUndoOnClick() {
@@ -162,10 +149,15 @@ public class SudokuSolver : MonoBehaviour {
 			return;
 		}
 
-		FillSolutionIntoSlot(slot.SlotIndex, _selectingInput.InputValue, FillReason.QuestionInput);
+		int inputValue = _selectingInput.InputValue;
+		if (slot.Value == inputValue) {
+			inputValue = 0;
+		}
+
+		FillSolutionIntoSlot(slot.SlotIndex, inputValue, FillReason.QuestionInput);
 		_undoIndex += 1;
 
-		RefreshUndoButton();
+		Refresh();
 	}
 
 	public void ButtonInputOnClick(UISudokuInput input) {
@@ -180,8 +172,7 @@ public class SudokuSolver : MonoBehaviour {
 			_selectingInput = input;
 		}
 
-		RefreshUISlots();
-		RefreshUIInputs();
+		Refresh();
 	}
 	#endregion
 
@@ -189,13 +180,9 @@ public class SudokuSolver : MonoBehaviour {
 	private void InitUI() {
 		// Reset menu
 		_btnReset.onClick.AddListener(ButtonResetOnClick);
-		_btnResetYes.onClick.AddListener(ButtonResetYesOnClick);
-		_btnResetNo.onClick.AddListener(ButtonResetNoOnClick);
 
 		// Serial number menu
 		_btnSerialNumber.onClick.AddListener(ButtonSerialNumberOnClick);
-		_btnSerialNumberYes.onClick.AddListener(ButtonSerialNumberYesOnClick);
-		_btnSerialNumberNo.onClick.AddListener(ButtonSerialNumberNoOnClick);
 
 		// Operation
 		_btnUndo.onClick.AddListener(ButtonUndoOnClick);
@@ -215,29 +202,36 @@ public class SudokuSolver : MonoBehaviour {
 	private void ResetData() {
 		// Sudoku data
 		ClearSudokuData();
-		RefreshUISlots();
 
 		// Selected input
 		_selectingInput = null;
-		RefreshUIInputs();
 
 		// Undo
 		ClearUndoData();
-		RefreshUndoButton();
 
 		// Log
 		ClearLogData();
 	}
 
 	private void ResetUI() {
-		ShowResetMenu(false, true, true).DoNotAwait();
-		ShowSerialNumberMenu(false, true, true).DoNotAwait();
 		ShowLogMenu(false);
+		Refresh();
 	}
 
 	private void ClearSudokuData() {
 		_sData = new SudokuData();
 		_uiSlotBoard.SetSudokuData(_sData);
+	}
+
+	private void ClearUndoData() {
+		_undoIndex = 0;
+		_undoCmdList.Clear();
+	}
+
+	private void Refresh() {
+		RefreshUISlots();
+		RefreshUIInputs();
+		RefreshButtons();
 	}
 
 	private void RefreshUISlots() {
@@ -249,93 +243,12 @@ public class SudokuSolver : MonoBehaviour {
 		_uiInputBoard.SetMarking(selectingInput);
 	}
 
-	private void ClearUndoData() {
-		_undoIndex = 0;
-		_undoCmdList.Clear();
-	}
-
-	private void RefreshUndoButton() {
+	private void RefreshButtons() {
+		_btnReset.interactable = _sData.HasAnyInput();
 		_btnUndo.interactable = _undoCmdList.Count > 0;
-	}
 
-	private async Task ShowResetMenu(bool show, bool skipTween, bool forcibly = false) {
-		if (!forcibly && _resetMenuOpened == show) {
-			return;
-		}
-
-		// Init tween
-		if (_tweenResetMenu != null && _tweenResetMenu.IsActive() && _tweenResetMenu.IsPlaying()) {
-			return;
-		}
-
-		if (show) {
-			_rtResetMenu.gameObject.SetActive(true);
-		}
-
-		_cgReset.blocksRaycasts = false;
-
-		float startAlpha = show ? 0.0f : 1.0f;
-		float goalAlpha = show ? 1.0f : 0.0f;
-		float duration = skipTween ? 0.0f : 0.3f;
-
-		_tweenResetMenu = DOTween.To(
-			() => startAlpha,
-			(v) => {
-				_cgReset.alpha = v;
-				startAlpha = v;
-			},
-			goalAlpha, duration).SetUpdate(true);
-
-		await _tweenResetMenu.AsyncWaitForCompletion();
-
-		if (!show) {
-			_rtResetMenu.gameObject.SetActive(false);
-		}
-		else {
-			_cgReset.blocksRaycasts = true;
-		}
-
-		_resetMenuOpened = show;
-	}
-
-	private async Task ShowSerialNumberMenu(bool show, bool skipTween, bool forcibly = false) {
-		if (!forcibly && _serialNumberMenuOpened == show) {
-			return;
-		}
-
-		// Init tween
-		if (_tweenSerialNumberMenu != null && _tweenSerialNumberMenu.IsActive() && _tweenSerialNumberMenu.IsPlaying()) {
-			return;
-		}
-
-		if (show) {
-			_rtSerialNumberMenu.gameObject.SetActive(true);
-		}
-
-		_cgSerialNumber.blocksRaycasts = false;
-
-		float startAlpha = show ? 0.0f : 1.0f;
-		float goalAlpha = show ? 1.0f : 0.0f;
-		float duration = skipTween ? 0.0f : 0.3f;
-
-		_tweenSerialNumberMenu = DOTween.To(
-			() => startAlpha,
-			(v) => {
-				_cgSerialNumber.alpha = v;
-				startAlpha = v;
-			},
-			goalAlpha, duration).SetUpdate(true);
-
-		await _tweenSerialNumberMenu.AsyncWaitForCompletion();
-
-		if (!show) {
-			_rtSerialNumberMenu.gameObject.SetActive(false);
-		}
-		else {
-			_cgSerialNumber.blocksRaycasts = true;
-		}
-
-		_serialNumberMenuOpened = show;
+		_btnFindAllSolution.interactable = _sData.HasAnyInput();
+		_btnFindNextSolution.interactable = _sData.HasAnyInput();
 	}
 
 	private void ShowLogMenu(bool show) {
@@ -354,13 +267,13 @@ public class SudokuSolver : MonoBehaviour {
 			FillReason reason = cmd.FillReasonList[i];
 
 			_sData.SetSlotValueAndReason(slotIndex, value, reason);
+			_sData.Update();
 		}
 
 		_undoIndex -= 1;
 		_undoCmdList.RemoveAt(_undoCmdList.Count - 1);
 
-		RefreshUISlots();
-		RefreshUndoButton();
+		Refresh();
 	}
 
 	private void FindSolution(bool findAll) {
@@ -381,7 +294,7 @@ public class SudokuSolver : MonoBehaviour {
 			_undoIndex += 1;
 		}
 
-		RefreshUndoButton();
+		Refresh();
 	}
 
 	private bool TryToFindNextStep() {
@@ -400,6 +313,7 @@ public class SudokuSolver : MonoBehaviour {
 
 		// Update data
 		_sData.SetSlotValueAndReason(slotIndex, value, reason);
+		_sData.Update();
 
 		UISudokuSlot uiSlot = _uiSlotBoard.GetUISlot(slotIndex);
 		// Add to undo

@@ -10,7 +10,11 @@ public static class SystemDefine {
     public const string KEY_VOLUME_SE = "key_volume_se";
 
     // Window
+    public const string UI_WINDOW_NAME_CONGRATULATIONS = "UIWindowCongratulations";
+    public const string UI_WINDOW_NAME_DIFFICULTY = "UIWindowDifficulty";
+    public const string UI_WINDOW_NAME_MESSAGE = "UIWindowMessage";
     public const string UI_WINDOW_NAME_OPTION = "UIWindowOption";
+    public const string UI_WINDOW_NAME_SERIAL_NUMBER = "UIWindowSerialNumber";
 }
 
 [System.Serializable]
@@ -18,4 +22,10 @@ public class BGMData {
     public AudioClip BGM;
     public float RepeatTime;
     public float LoopStartTime;
+}
+
+public enum Difficulty { 
+    Easy,
+    Normal,
+    Hard,
 }

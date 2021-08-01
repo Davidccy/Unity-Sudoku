@@ -49,7 +49,9 @@ public abstract class UIGenericWindow : MonoBehaviour {
 
 	#region Mono Behaviour Hooks
 	private void Awake() {
-		_btnClose.onClick.AddListener(ButtonCloseOnClick);
+		if (_btnClose != null) {
+			_btnClose.onClick.AddListener(ButtonCloseOnClick);
+		}		
 
 		OnWindowAwake();
 	}
@@ -63,7 +65,9 @@ public abstract class UIGenericWindow : MonoBehaviour {
 	}
 
 	private void OnDestroy() {
-		_btnClose.onClick.RemoveAllListeners();
+		if (_btnClose != null) {
+			_btnClose.onClick.RemoveAllListeners();
+		}
 
 		OnWindowDestroy();
 	}

@@ -57,7 +57,7 @@ public class UIWindowOption : UIGenericWindow {
     }
     #endregion
 
-    #region UI Slider Ui Button Handlings
+    #region UI Slider UI Button Handlings
     private void SliderBGMOnValueChanged(float value) {
         AudioManager.Instance.SetVolumeBGM(value);
         PlaySliderSoundEffect();
