@@ -11,6 +11,9 @@ public class UIMainPageMenu : IUIMainPageBase {
 
     [SerializeField]
     private Button _btnOption = null;
+
+    [SerializeField]
+    private Button _btnCredits = null;
     #endregion
 
     #region Mono Behavoiur Hooks
@@ -18,6 +21,7 @@ public class UIMainPageMenu : IUIMainPageBase {
         _btnSolver.onClick.AddListener(ButtonSolverOnClick);
         _btnGenerator.onClick.AddListener(ButtonGeneratorOnClick);
         _btnOption.onClick.AddListener(ButtonOptionOnClick);
+        _btnCredits.onClick.AddListener(ButtonCreditsOnClick);
     }
     #endregion
 
@@ -32,6 +36,10 @@ public class UIMainPageMenu : IUIMainPageBase {
 
     private void ButtonOptionOnClick() {
         UIWindowManager.Instance.OpenWindow(SystemDefine.UI_WINDOW_NAME_OPTION).DoNotAwait();
+    }
+
+    private void ButtonCreditsOnClick() {
+        UIWindowManager.Instance.OpenWindow(SystemDefine.UI_WINDOW_NAME_CREDITS).DoNotAwait();
     }
     #endregion
 }

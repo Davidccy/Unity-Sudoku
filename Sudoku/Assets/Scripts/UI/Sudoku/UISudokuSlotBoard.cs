@@ -51,6 +51,15 @@ public class UISudokuSlotBoard : MonoBehaviour {
             _uiSlotList[i].SetValueAndReason(_sData.SlotDataList[i].Value, _sData.SlotDataList[i].Reason);
         }
     }
+
+    public void HighlightSlot(int slotIndex) {
+        UISudokuSlot slot = GetUISlot(slotIndex);
+        if (slot == null) {
+            return;
+        }
+
+        slot.PlayTweenHighlight();
+    }
     #endregion
 
     #region Internal Methods

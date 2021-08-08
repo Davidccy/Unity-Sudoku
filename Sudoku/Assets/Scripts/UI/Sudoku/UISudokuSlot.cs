@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using DG.Tweening;
 
 public class UISudokuSlot : MonoBehaviour {
     #region Serialized Fields
@@ -22,6 +23,7 @@ public class UISudokuSlot : MonoBehaviour {
     private Action<UISudokuSlot> _btnAction;
     private int _value;
     private FillReason _reason = FillReason.None;
+    private Tween _tweenHighlight;
     #endregion
 
     #region Mono Behaviurs Hooks
@@ -79,6 +81,23 @@ public class UISudokuSlot : MonoBehaviour {
     public void RefreshDisplay() {
         _textValue.color = SudokuUtility.GetFillReasonColor(_reason);
         _textValue.text = _value == 0 ? string.Empty : string.Format("{0}", _value);
+    }
+
+    public void PlayTweenHighlight() {
+        if (_tweenHighlight != null && _tweenHighlight.IsActive()) {
+            _tweenHighlight.Kill();
+        }
+
+        float progress = 0;
+        _tweenHighlight = DOTween.To(
+            () => progress,
+            (v) => {
+                progress = v;
+                _textValue.transform.localScale = Vector3.one * (1 + Mathf.Sin(Mathf.PI * progress) * 0.5f);
+            },
+            1,
+            0.3f
+            ).SetEase(Ease.Linear).SetUpdate(true);
     }
     #endregion
 }

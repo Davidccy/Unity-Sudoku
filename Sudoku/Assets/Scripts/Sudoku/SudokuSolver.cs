@@ -73,6 +73,7 @@ public class SudokuSolver : MonoBehaviour {
 		cmd.Title = "Are you sure to reset all slot ?";
 		cmd.ActionYes = () => {
 			ResetData();
+			ResetUI();
 			UIWindowManager.Instance.CloseWindow(SystemDefine.UI_WINDOW_NAME_MESSAGE).DoNotAwait();
 		};
 		cmd.ActionNo = () => {
@@ -325,7 +326,7 @@ public class SudokuSolver : MonoBehaviour {
 		uiSlot.SetValueAndReason(value, reason);
 
 		if (reason != FillReason.QuestionInput) {
-			AddSolutionLog(rowIndex, columnIndex, value, reason);
+			AddSolutionLog(slotIndex, value, reason);
 		}
 	}
 
@@ -335,10 +336,15 @@ public class SudokuSolver : MonoBehaviour {
 		FillSolutionIntoSlot(rowIndex, columnIndex, value, reason);
 	}
 
-	private void AddSolutionLog(int rowIndex, int columnIndex, int value, FillReason reason) {
+	private void AddSolutionLog(int slotIndex, int value, FillReason reason) {
 		UISolutionLog newLog = Instantiate(_solutionLogRes, _goSolutionLogRoot.transform);
-		newLog.SetFillReason(rowIndex, columnIndex, value, reason);
+		newLog.SetFillReason(slotIndex, value, reason);
+		newLog.SetOnClickAction(UISolutionLogOnClickAction);
 		_solutionLogList.Add(newLog);
+	}
+
+	private void UISolutionLogOnClickAction(UISolutionLog log) {
+		_uiSlotBoard.HighlightSlot(log.TargetSlotIndex);
 	}
 
 	private void ClearLogData() {

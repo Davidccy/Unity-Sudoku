@@ -10,6 +10,9 @@ public class UIRollingBackground : MonoBehaviour {
     public float _speedY;
     [SerializeField]
     public Image _imageRes = null;
+
+    [SerializeField]
+    private Gradient aa = null;
     #endregion
 
     #region Internal Fields

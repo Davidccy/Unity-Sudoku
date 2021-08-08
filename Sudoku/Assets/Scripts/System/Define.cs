@@ -11,6 +11,7 @@ public static class SystemDefine {
 
     // Window
     public const string UI_WINDOW_NAME_CONGRATULATIONS = "UIWindowCongratulations";
+    public const string UI_WINDOW_NAME_CREDITS = "UIWindowCredits";
     public const string UI_WINDOW_NAME_DIFFICULTY = "UIWindowDifficulty";
     public const string UI_WINDOW_NAME_MESSAGE = "UIWindowMessage";
     public const string UI_WINDOW_NAME_OPTION = "UIWindowOption";
