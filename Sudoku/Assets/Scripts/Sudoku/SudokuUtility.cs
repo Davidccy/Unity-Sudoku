@@ -202,6 +202,20 @@ public class SudokuData {
 		return true;
 	}
 
+	public bool FillAllSolution() {
+		if (!IsSolvable()) {
+			return false;
+		}
+
+		while (this.HasEmptySlot()) {
+			SolutionInfo solution = SudokuUtility.FindSolution(this);
+			SetSlotValueAndReason(solution.SlotData.SlotIndex, solution.Value, FillReason.PlayerInput);
+			Update();
+		}
+
+		return true;
+	}
+
 	public void ClearAll() {
 		Init();
 	}

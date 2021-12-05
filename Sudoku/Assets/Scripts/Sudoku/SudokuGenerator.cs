@@ -25,6 +25,7 @@ public class SudokuGenerator : MonoBehaviour {
     #region Internal Fields
     private float _timer = 0;
     private bool _isQuizGenerated = false;
+    private bool _isResolving = false;
     private int _difficulty = 0;
     private SudokuData _sData;
     private UISudokuInput _selectingInput = null;
@@ -36,7 +37,7 @@ public class SudokuGenerator : MonoBehaviour {
     }
 
     private void Update() {
-        if (_isQuizGenerated) {
+        if (_isQuizGenerated && _isResolving) {
             _timer += Time.deltaTime;
         }
     }
@@ -71,12 +72,35 @@ public class SudokuGenerator : MonoBehaviour {
         ShowDifficultyWindow();
     }
 
-    private void ButtonShowSolutionOnClick() {
-        // TODO
+    private async void ButtonShowSolutionOnClick() {
+        UIWindowMessage window = await UIWindowManager.Instance.GetWindow(SystemDefine.UI_WINDOW_NAME_MESSAGE) as UIWindowMessage;
+        UIWindowMessage.MessageCmd cmd = new UIWindowMessage.MessageCmd();
+        cmd.Type = UIWindowMessage.MessageType.YesNo;
+        cmd.Title = "Are you sure to show all solutions ?";
+        cmd.ActionYes = async () => {
+            UIWindowManager.Instance.CloseWindow(SystemDefine.UI_WINDOW_NAME_MESSAGE).DoNotAwait();
+            if (_sData.IsSolvable()) {
+                _sData.FillAllSolution();
+
+                _selectingInput = null;
+
+                Refresh();
+            }
+        };
+        cmd.ActionNo = () => {
+            UIWindowManager.Instance.CloseWindow(SystemDefine.UI_WINDOW_NAME_MESSAGE).DoNotAwait();
+        };
+
+        window.SetInfo(cmd);
+        window.Show(true, false).DoNotAwait();
     }
 
     public void ButtonSlotOnClick(UISudokuSlot slot) {
         if (!_isQuizGenerated) {
+            return;
+        }
+
+        if (!_isResolving) {
             return;
         }
 
@@ -105,6 +129,10 @@ public class SudokuGenerator : MonoBehaviour {
 
     public void ButtonInputOnClick(UISudokuInput input) {
         if (!_isQuizGenerated) {
+            return;
+        }
+
+        if (!_isResolving) {
             return;
         }
 
@@ -153,7 +181,6 @@ public class SudokuGenerator : MonoBehaviour {
     }
 
     private void ResetUI() {
-        //ShowLogMenu(false);
         Refresh();
     }
 
@@ -162,12 +189,19 @@ public class SudokuGenerator : MonoBehaviour {
         _uiSlotBoard.SetSudokuData(_sData);
 
         _isQuizGenerated = false;
+        _isResolving = false;
     }
 
     private void Refresh() {
+        RefreshButtons();
         RefreshUISlots();
         RefreshUIInputs();
         RefreshTimer();
+    }
+
+    private void RefreshButtons() {
+        _btnNewQuiz.interactable = true; // Always true
+        _btnShowSolution.interactable = _isResolving;
     }
 
     private void RefreshUISlots() {
@@ -233,10 +267,13 @@ public class SudokuGenerator : MonoBehaviour {
         _uiSlotBoard.RefreshAllSlot();
 
         _isQuizGenerated = true;
+        _isResolving = true;
     }
 
     private async void OnSudokuDataInputChanged() {
         if (SudokuUtility.IsSudokuDataComplete(_sData)) {
+            _isResolving = false;
+
             UIWindowCongratulations window = await UIWindowManager.Instance.GetWindow(SystemDefine.UI_WINDOW_NAME_CONGRATULATIONS) as UIWindowCongratulations;
             await window.Show(true, true);
             window.PlayAnimation();
