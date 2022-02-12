@@ -14,7 +14,7 @@ public class UIWindowDifficulty : UIGenericWindow {
     private Button _btnHard = null;
 
     [SerializeField]
-    private Button _btnCancle = null;
+    private Button _btnCancel = null;
     #endregion
 
     #region Exposed Fields
@@ -30,14 +30,14 @@ public class UIWindowDifficulty : UIGenericWindow {
         _btnEasy.onClick.AddListener(() => ButtonDifficultyOnClick((int) Difficulty.Easy));
         _btnNormal.onClick.AddListener(() => ButtonDifficultyOnClick((int) Difficulty.Normal));
         _btnHard.onClick.AddListener(() => ButtonDifficultyOnClick((int) Difficulty.Hard));
-        _btnCancle.onClick.AddListener(ButtonCancleOnClick);
+        _btnCancel.onClick.AddListener(ButtonCancleOnClick);
     }
 
     protected override void OnWindowDestroy() {
         _btnEasy.onClick.RemoveAllListeners();
         _btnNormal.onClick.RemoveAllListeners();
         _btnHard.onClick.RemoveAllListeners();
-        _btnCancle.onClick.RemoveAllListeners();
+        _btnCancel.onClick.RemoveAllListeners();
     }
     #endregion
 
