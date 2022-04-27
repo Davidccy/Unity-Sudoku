@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
-using System.Collections.Generic;
 
 public class UIGradientBackground : MonoBehaviour {
     // NOTE:
@@ -46,21 +45,4 @@ public class UIGradientBackground : MonoBehaviour {
             .SetUpdate(true).SetLoops(-1, LoopType.Yoyo);
     }
     #endregion
-
-    private void Test() {
-        var tempClassList = new List<(int, string)>();
-
-        // Add and remove of list
-        tempClassList.Add((1, "1"));
-        tempClassList.Remove((1, "2"));
-
-        // Get and set
-        var element1 = tempClassList[0];
-        element1.Item1 = 0;
-        element1.Item2 = string.Empty;
-
-        (int, string) element2 = tempClassList[0];
-        element2.Item1 = 0;
-        element2.Item2 = string.Empty;
-    }
 }
